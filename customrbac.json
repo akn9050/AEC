@@ -1,0 +1,20 @@
+{
+  "Name": "Custom rbac Roles",
+  "Id": "fb99bac5-5d10-4a50-a6fc-b2d30fa029f5",
+  "IsCustom": true,
+  "Description": "rbac- user roles",
+  "Actions": [
+	"Microsoft.Authorization/*/read",
+  "Microsoft.Resources/deployments/*",
+  "Microsoft.Resources/subscriptions/resourceGroups/read",
+  "Microsoft.Storage/storageAccounts/*",
+  "Microsoft.Compute/virtualMachines/start/action",
+  "Microsoft.Compute/virtualMachines/restart/action",
+  "Microsoft.Compute/virtualMachines/deallocate/action"
+  ],
+  "NotActions": [
+  ],
+  "AssignableScopes": [
+    
+  ]
+}
