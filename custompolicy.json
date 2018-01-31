@@ -78,7 +78,7 @@
                 },
                 {
                   "field": "Microsoft.Compute/virtualMachines/imageSku",
-                  "in": "windows2016"
+                  "in": "windows2016byol"
                 }
               ]
             }
