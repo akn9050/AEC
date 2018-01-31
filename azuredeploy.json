@@ -70,7 +70,7 @@
                         "imageReference": {
                             "publisher": "microsoft-ads",
                             "offer": "windows-data-science-vm",
-                            "sku": "windows2016",
+                            "sku": "windows2016byol",
                             "version": "latest"
                         },
                         "osDisk": {
@@ -90,7 +90,7 @@
                     }
                 },
                 "plan": {
-                    "name": "windows2016",
+                    "name": "windows2016byol",
                     "publisher": "microsoft-ads",
                     "product": "windows-data-science-vm"
                 }
