@@ -268,9 +268,21 @@
             }
         ],
         "outputs": {
-            "adminUsername": {
+            "dsVmAdmin": {
                 "type": "string",
                 "value": "[parameters('adminUsername')]"
+            },
+            "dsVmPassword": {
+                "type": "string",
+                "value": "[parameters('adminPassword')]"
+            },
+            "sqlDWDBAdmin": {
+                "type": "string",
+                "value": "[parameters('sqlDWDBAdminName')]"
+            },
+            "sqlDWAdminPassword": {
+                "type": "string",
+                "value": "[parameters('sqlDWAdminPassword')]"
             }
         }
     }
