@@ -74,11 +74,11 @@
                 },
                 {
                   "field": "Microsoft.Compute/virtualMachines/imageOffer",
-                  "in": "windows-data-science-vm"
+                  "equals": "windows-data-science-vm"
                 },
                 {
                   "field": "Microsoft.Compute/virtualMachines/imageSku",
-                  "in": "windows2016byol"
+                  "equals": "windows2016byol"
                 }
               ]
             }
@@ -124,21 +124,7 @@
         }
       }
     ]
-  },
-    {
-        "allOf": [
-          {
-            "field": "type",
-            "equals": "Microsoft.AnalysisServices/servers"
-          },
-          {
-            "not": {
-              "field": "Microsoft.AnalysisServices/servers/sku.name",
-              "equals": "S0"
-            }
-          }
-        ]
-      }
+  }
 ]
      },
   "then": {
