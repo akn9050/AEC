@@ -2,10 +2,10 @@
         "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
         "parameters": {
-            "adminUsername": {
+            "vmAdminUsername": {
                 "type": "string"
             },
-            "adminPassword": {
+            "vmAdminPassword": {
                 "type": "securestring"
             },
             "sqlDWDBAdminName": {
@@ -19,27 +19,22 @@
                 "metadata": {
                   "description": "SQL Datawarehouse Admin password. Ex: Testadmin@123"
                 }
-              },
-              "CurrentAdAccount": {
-                "type": "String",
-                "metadata": {
-                    "description": "Enter your AD account"
-                }
-            }
+              }
         },
         "variables": {
             "sqlDWDBName": "sqlDwDb",
             "serviceLevelObjective": "DW100",
             "collation": "SQL_Latin1_General_CP1_CI_AS",
             "version": "12.0",
-            "sqlDWServerName": "[concat('server',uniqueString(resourceGroup().id))]",
-            "servername": "[concat('srvr',uniqueString(resourceGroup().id))]",
+            "sqlDWServerName": "[concat('sqlserver',uniqueString(resourceGroup().id))]",
+            "aSServerName": "[concat('asserver',uniqueString(resourceGroup().id))]",
             "virtualNetworkName": "vNet",
             "vmName": "DSVM",
             "virtualMachineSize": "Standard_Ds3_v2",
             "networkInterfaceName": "[concat(variables('vmName'), '-nic')]",
             "networkSecurityGroupName": "[concat(variables('vmName'), '-nsg')]",
-            "publicIpAddressName": "[concat(variables('vmName'), '-pIP')]",
+            "publicIpAddressName": "[concat(variables('vmName'), '-PIP')]",
+		    "publicIpAddressDNSName": "[concat('dsvm', uniqueString(resourceGroup().id))]",
             "subnetName": "subnet1",
             "location": "[resourceGroup().location]",
             "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
@@ -57,8 +52,8 @@
                 "properties": {
                     "osProfile": {
                         "computerName": "[variables('vmName')]",
-                        "adminUsername": "[parameters('adminUsername')]",
-                        "adminPassword": "[parameters('adminPassword')]",
+                        "adminUsername": "[parameters('vmAdminUsername')]",
+                        "adminPassword": "[parameters('vmAdminPassword')]",
                         "windowsConfiguration": {
                             "provisionVmAgent": "true"
                         }
@@ -152,9 +147,13 @@
                 "apiVersion": "2017-08-01",
                 "location": "[variables('location')]",
                 "properties": {
-                    "publicIpAllocationMethod": "Dynamic"
+                     "publicIPAllocationMethod": "Dynamic",
+                "idleTimeoutInMinutes": 4,
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(variables('publicIpAddressDNSName'))]"
                 }
-            },
+            }
+        },
             {
                 "name": "[variables('networkSecurityGroupName')]",
                 "type": "Microsoft.Network/networkSecurityGroups",
@@ -209,15 +208,10 @@
                 "sku": {
                     "name": "S0"
                 },
-                "name": "[variables('servername')]",
+                "name": "[variables('aSServerName')]",
                 "apiVersion": "2017-08-01",
                 "location": "[variables('location')]",
                 "properties": {
-                    "asAdministrators": {
-                        "members": [
-                            "[parameters('CurrentAdAccount')]"
-                        ]
-                    },
                     "managedMode": "1"
                 }
             },
@@ -230,8 +224,7 @@
                     "administratorLogin": "[parameters('sqlDWDBAdminName')]",
                     "administratorLoginPassword": "[parameters('sqlDWAdminPassword')]",
                     "version": "[variables('version')]"
-                },
-                
+                },                
                 "resources": [
                     {   
                         "name": "[variables('sqlDWDBName')]",
@@ -240,14 +233,12 @@
                         "dependsOn": [
                             "[concat('Microsoft.Sql/servers/', variables('sqlDWServerName'))]"
                         ],
-                        "location": "[variables('location')]",
-                        
+                        "location": "[variables('location')]",                        
                         "properties": {
                             "edition": "DataWarehouse",
                             "collation": "[variables('collation')]",
                             "serviceLevelObjective": "[variables('serviceLevelObjective')]"
-                        }
-                       
+                        }                       
                     },
                     {
                         "apiVersion": "2014-04-01-preview",
@@ -260,29 +251,36 @@
                          "properties": {
                             "endIpAddress": "0.0.0.0",
                             "startIpAddress": "0.0.0.0"
-                        }
-                        
+                        }                        
                     }
-                ]
-                
+                ]                
             }
         ],
         "outputs": {
-            "dsVmAdmin": {
-                "type": "string",
-                "value": "[parameters('adminUsername')]"
+            "dsvmDNSName": {
+                   "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpAddressName'))).dnsSettings.fqdn]",
+            "type": "string"
             },
-            "dsVmPassword": {
+            "dsvmUsername": {
                 "type": "string",
-                "value": "[parameters('adminPassword')]"
+                "value": "[parameters('vmAdminUsername')]"
             },
-            "sqlDWDBAdmin": {
+			 "dsvmPassword": {
+                "type": "string",
+                "value": "[parameters('vmAdminPassword')]"
+            },
+			 "sqlDWServerName": {
+                   "value":"[concat(variables('sqlDWServerName'),'.database.windows.net')]",
+                   "type":"string"
+            },
+			 "sqlDWUsername": {
                 "type": "string",
                 "value": "[parameters('sqlDWDBAdminName')]"
             },
-            "sqlDWAdminPassword": {
+			 "sqlDWPassword": {
                 "type": "string",
                 "value": "[parameters('sqlDWAdminPassword')]"
             }
+			 
         }
     }
