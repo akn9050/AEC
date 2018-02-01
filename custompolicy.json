@@ -117,8 +117,8 @@
               "equals": "DataWarehouse"
             },
             {
-              "field": "Microsoft.Sql/servers/databases/requestedServiceObjectiveId",
-              "equals": "4e63cb0e-91b9-46fd-b05c-51fdd2367618"
+              "field": "Microsoft.Sql/servers/databases/requestedServiceObjectiveName",
+              "equals": "DW100"
             }
           ]
         }
