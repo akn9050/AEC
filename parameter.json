@@ -2,10 +2,10 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "adminUsername": {
+    "vmAdminUsername": {
       "value": "demouser"
     },
-    "adminPassword": {
+    "vmAdminPassword": {
       "value": "demoPassword1!"
     },
      "sqlDWDBAdminName": {
@@ -13,9 +13,6 @@
     },
     "sqlDWAdminPassword": {
       "value": "demoPassword1!"
-    },
-    "CurrentAdAccount": {
-      "value": "GET-AZUSER-UPN"
     }
   }
 }
