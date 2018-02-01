@@ -1,1 +1,133 @@
-
+{
+  "if": {
+    "anyOf": [
+      {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "not": {
+              "field": "Microsoft.Storage/storageAccounts/sku.name",
+              "equals": "Standard_LRS"
+            }
+          }
+        ]
+      },
+      {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "not": {
+              "field": "Microsoft.Compute/virtualMachines/sku.name",
+              "equals": "Standard_DS3_v2"
+            }
+          }
+        ]
+      },
+      {
+        "not": {
+          "anyOf": [
+            {
+              "field": "type",
+              "like": "Microsoft.Resources/*"
+            },
+            {
+              "field": "type",
+              "like": "Microsoft.Compute/*"
+            },
+            {
+              "field": "type",
+              "like": "Microsoft.Storage/*"
+            },
+            {
+              "field": "type",
+              "like": "Microsoft.Network/*"
+            },
+            {
+              "field":"type",
+              "like":"Microsoft.Sql/*"
+            },
+            {
+              "field":"type",
+              "like":"Microsoft.AnalysisServices/*"
+            }  
+        ]
+        }
+      },
+      {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "not": {
+              "allOf": [
+                {
+                  "field": "Microsoft.Compute/virtualMachines/imagePublisher",
+                  "equals": "microsoft-ads"
+                },
+                {
+                  "field": "Microsoft.Compute/virtualMachines/imageOffer",
+                  "equals": "windows-data-science-vm"
+                },
+                {
+                  "field": "Microsoft.Compute/virtualMachines/imageSku",
+                  "equals": "windows2016"
+                }
+              ]
+            }
+          }
+        ]
+      },
+     {
+        "allof":[
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+          },
+          {
+            "not":{
+            "allof":[
+              {
+                "field": "Microsoft.Sql/servers/version",
+                "in": ["12.0"]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "allof":[
+        {
+          "field": "type",
+          "equals": "Microsoft.sql/servers/databases"
+        },
+        {
+          "not":{
+             "allof":[
+            {
+              "field": "Microsoft.Sql/servers/databases/edition",
+              "equals": "DataWarehouse"
+            },
+            {
+              "field": "Microsoft.Sql/servers/databases/requestedServiceObjectiveName",
+              "equals": "DW100"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]
+     },
+  "then": {
+    "effect": "deny"
+  }
+}
