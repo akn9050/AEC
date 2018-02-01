@@ -34,7 +34,7 @@
             "networkInterfaceName": "[concat(variables('vmName'), '-nic')]",
             "networkSecurityGroupName": "[concat(variables('vmName'), '-nsg')]",
             "publicIpAddressName": "[concat(variables('vmName'), '-PIP')]",
-		    "publicIpAddressDNSName": "[concat('dsvm', uniqueString(resourceGroup().id))]",
+	    "publicIpAddressDNSName": "[concat('dsvm', uniqueString(resourceGroup().id))]",
             "subnetName": "subnet1",
             "location": "[resourceGroup().location]",
             "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
