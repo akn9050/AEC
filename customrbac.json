@@ -1,5 +1,5 @@
 {
-  "Name": "Custom rbac Roles",
+  "Name": "Azure Advanced Analytics RBAC",
   "Id": "fb99bac5-5d10-4a50-a6fc-b2d30fa029f5",
   "IsCustom": true,
   "Description": "rbac- user roles",
