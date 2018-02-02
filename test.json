@@ -1,294 +1,321 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmAdminUsername": {
+      "type": "string"
+    },
+    "vmAdminPassword": {
+      "type": "securestring"
+    },
+    "sqlDWDBAdminName": {
+      "type": "string",
+      "metadata": {
+        "description": "SQL Datawarehouse Admin Name"
+      }
+    },
+    "sqlDWAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SQL Datawarehouse Admin password. Ex: Testadmin@123"
+      }
+    },
+    "UPN": {
+        "type": "string"
+    }  
+  },
+  "variables": {
+    "sqlDWDBName": "sqlDwDb",
+    "serviceLevelObjective": "DW100",
+    "collation": "SQL_Latin1_General_CP1_CI_AS",
+    "version": "12.0",
+    "sqlDWServerName": "[concat('sqlserver',uniqueString(resourceGroup().id))]",
+    "aSServerName": "[concat('asserver',uniqueString(resourceGroup().id))]",
+    "virtualNetworkName": "vNet",
+    "vmName": "DSVM",
+    "virtualMachineSize": "Standard_Ds3_v2",
+    "networkInterfaceName": "[concat(variables('vmName'), '-nic')]",
+    "networkSecurityGroupName": "[concat(variables('vmName'), '-nsg')]",
+    "publicIpAddressName": "[concat(variables('vmName'), '-PIP')]",
+    "publicIpAddressDNSName": "[concat('dsvm', uniqueString(resourceGroup().id))]",
+    "subnetName": "subnet1",
+    "location": "[resourceGroup().location]",
+    "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]"
+    },
+  "resources": [
     {
-        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-        "contentVersion": "1.0.0.0",
-        "parameters": {
-            "vmAdminUsername": {
-                "type": "string"
-            },
-            "vmAdminPassword": {
-                "type": "securestring"
-            },
-            "sqlDWDBAdminName": {
-                "type": "string",
-                "metadata": {
-                  "description": "SQL Datawarehouse Admin Name"
-                }
-              },
-              "sqlDWAdminPassword": {
-                "type": "securestring",
-                "metadata": {
-                  "description": "SQL Datawarehouse Admin password. Ex: Testadmin@123"
-                }
-              },
-              "UPN": {
-                "type": "string"
-            }           
+      "name": "[variables('vmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+      ],
+      "properties": {
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]",
+          "windowsConfiguration": {
+            "provisionVmAgent": "true"
+          }
         },
-        "variables": {
-            "sqlDWDBName": "sqlDwDb",
-            "serviceLevelObjective": "DW100",
-            "collation": "SQL_Latin1_General_CP1_CI_AS",
-            "version": "12.0",
-            "sqlDWServerName": "[concat('sqlserver',uniqueString(resourceGroup().id))]",
-            "aSServerName": "[concat('asserver',uniqueString(resourceGroup().id))]",
-            "virtualNetworkName": "vNet",
-            "vmName": "DSVM",
-            "virtualMachineSize": "Standard_Ds3_v2",
-            "networkInterfaceName": "[concat(variables('vmName'), '-nic')]",
-            "networkSecurityGroupName": "[concat(variables('vmName'), '-nsg')]",
-            "publicIpAddressName": "[concat(variables('vmName'), '-PIP')]",
-	        "publicIpAddressDNSName": "[concat('dsvm', uniqueString(resourceGroup().id))]",
-            "subnetName": "subnet1",
-            "location": "[resourceGroup().location]",
-            "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-            "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]"
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSize')]"
         },
-        "resources": [
-            {
-                "name": "[variables('vmName')]",
-                "type": "Microsoft.Compute/virtualMachines",
-                "apiVersion": "2016-04-30-preview",
-                "location": "[variables('location')]",
-                "dependsOn": [
-                    "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
-                ],
-                "properties": {
-                    "osProfile": {
-                        "computerName": "[variables('vmName')]",
-                        "adminUsername": "[parameters('vmAdminUsername')]",
-                        "adminPassword": "[parameters('vmAdminPassword')]",
-                        "windowsConfiguration": {
-                            "provisionVmAgent": "true"
-                        }
-                    },
-                    "hardwareProfile": {
-                        "vmSize": "[variables('virtualMachineSize')]"
-                    },
-                    "storageProfile": {
-                        "imageReference": {
-                            "publisher": "microsoft-ads",
-                            "offer": "windows-data-science-vm",
-                            "sku": "windows2016",
-                            "version": "latest"
-                        },
-                        "osDisk": {
-                            "createOption": "fromImage",
-                            "managedDisk": {
-                                "storageAccountType": "Standard_LRS"
-                            }
-                        },
-                        "dataDisks": []
-                    },
-                    "networkProfile": {
-                        "networkInterfaces": [
-                            {
-                                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
-                            }
-                        ]
-                    }
-                },
-                "plan": {
-                    "name": "windows2016",
-                    "publisher": "microsoft-ads",
-                    "product": "windows-data-science-vm"
-                }
-            },
-            {
-                "name": "[variables('virtualNetworkName')]",
-                "type": "Microsoft.Network/virtualNetworks",
-                "apiVersion": "2017-08-01",
-                "location": "[variables('location')]",
-                "properties": {
-                    "addressSpace": {
-                        "addressPrefixes": [
-                            "192.168.0.0/16"
-                        ]
-                    },
-                    "subnets": [
-                        {
-                            "name": "[variables('subnetName')]",
-                            "properties": {
-                                "addressPrefix": "192.168.0.0/24"
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                "name": "[variables('networkInterfaceName')]",
-                "type": "Microsoft.Network/networkInterfaces",
-                "apiVersion": "2016-09-01",
-                "location": "[variables('location')]",
-                "dependsOn": [
-                    "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-                    "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]",
-                    "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
-                ],
-                "properties": {
-                    "ipConfigurations": [
-                        {
-                            "name": "ipconfig1",
-                            "properties": {
-                                "subnet": {
-                                    "id": "[variables('subnetRef')]"
-                                },
-                                "privateIPAllocationMethod": "Dynamic",
-                                "publicIpAddress": {
-                                    "id": "[resourceId(resourceGroup().name,'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
-                                }
-                            }
-                        }
-                    ],
-                    "networkSecurityGroup": {
-                        "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
-                    }
-                }
-            },
-            {
-                "name": "[variables('publicIpAddressName')]",
-                "type": "Microsoft.Network/publicIpAddresses",
-                "apiVersion": "2017-08-01",
-                "location": "[variables('location')]",
-                "properties": {
-                     "publicIPAllocationMethod": "Dynamic",
-                "idleTimeoutInMinutes": 4,
-                "dnsSettings": {
-                    "domainNameLabel": "[concat(variables('publicIpAddressDNSName'))]"
-                }
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "microsoft-ads",
+            "offer": "windows-data-science-vm",
+            "sku": "windows2016",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "fromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
             }
+          },
+          "dataDisks": []
         },
+        "networkProfile": {
+          "networkInterfaces": [
             {
-                "name": "[variables('networkSecurityGroupName')]",
-                "type": "Microsoft.Network/networkSecurityGroups",
-                "apiVersion": "2017-06-01",
-                "location": "[variables('location')]",
-                "properties": {
-                    "securityRules": [
-                        {
-                            "name": "Jupyter",
-                            "properties": {
-                                "priority": 1010,
-                                "protocol": "TCP",
-                                "access": "Allow",
-                                "direction": "Inbound",
-                                "sourceAddressPrefix": "*",
-                                "sourcePortRange": "*",
-                                "destinationAddressPrefix": "*",
-                                "destinationPortRange": "9999"
-                            }
-                        },
-                        {
-                            "name": "MSSQL",
-                            "properties": {
-                                "priority": 1020,
-                                "protocol": "TCP",
-                                "access": "Allow",
-                                "direction": "Inbound",
-                                "sourceAddressPrefix": "*",
-                                "sourcePortRange": "*",
-                                "destinationAddressPrefix": "*",
-                                "destinationPortRange": "1433"
-                            }
-                        },
-                        {
-                            "name": "default-allow-rdp",
-                            "properties": {
-                                "priority": 1030,
-                                "protocol": "TCP",
-                                "access": "Allow",
-                                "direction": "Inbound",
-                                "sourceAddressPrefix": "*",
-                                "sourcePortRange": "*",
-                                "destinationAddressPrefix": "*",
-                                "destinationPortRange": "3389"
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                "type": "Microsoft.AnalysisServices/servers",
-                "sku": {
-                    "name": "S0"
-                },
-                "name": "[variables('aSServerName')]",
-                "apiVersion": "2017-08-01",
-                "location": "[variables('location')]",
-                "properties": {
-                    "asAdministrators": {
-                        "members": [
-                            "[parameters('UPN')]"
-                        ]
-                    },
-                    "managedMode": "1"
-                }
-            },
-            {
-                "apiVersion": "2014-04-01-preview",
-                "location": "[variables('location')]",
-                "name": "[variables('sqlDWServerName')]",
-                "type": "Microsoft.Sql/servers",
-                "properties": {
-                    "administratorLogin": "[parameters('sqlDWDBAdminName')]",
-                    "administratorLoginPassword": "[parameters('sqlDWAdminPassword')]",
-                    "version": "[variables('version')]"
-                },                
-                "resources": [
-                    {   
-                        "name": "[variables('sqlDWDBName')]",
-                        "apiVersion": "2014-04-01-preview",
-                        "type": "databases",
-                        "dependsOn": [
-                            "[concat('Microsoft.Sql/servers/', variables('sqlDWServerName'))]"
-                        ],
-                        "location": "[variables('location')]",                        
-                        "properties": {
-                            "edition": "DataWarehouse",
-                            "collation": "[variables('collation')]",
-                            "serviceLevelObjective": "[variables('serviceLevelObjective')]"
-                        }                       
-                    },
-                    {
-                        "apiVersion": "2014-04-01-preview",
-                        "type": "firewallrules",
-                        "location": "[variables('location')]",
-                        "name": "AllowAllWindowsAzureIps",
-                        "dependsOn": [
-                            "[concat('Microsoft.Sql/servers/', variables('sqlDWServerName'))]"
-                        ],
-                         "properties": {
-                            "endIpAddress": "0.0.0.0",
-                            "startIpAddress": "0.0.0.0"
-                        }                        
-                    }
-                ]                
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
             }
-        ],
-        "outputs": {
-            "dsvmDNSName": {
-                   "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpAddressName'))).dnsSettings.fqdn]",
-            "type": "string"
-            },
-            "dsvmUsername": {
-                "type": "string",
-                "value": "[parameters('vmAdminUsername')]"
-            },
-			 "dsvmPassword": {
-                "type": "string",
-                "value": "[parameters('vmAdminPassword')]"
-            },
-			 "sqlDWServerName": {
-                   "value":"[concat(variables('sqlDWServerName'),'.database.windows.net')]",
-                   "type":"string"
-            },
-			 "sqlDWUsername": {
-                "type": "string",
-                "value": "[parameters('sqlDWDBAdminName')]"
-            },
-			 "sqlDWPassword": {
-                "type": "string",
-                "value": "[parameters('sqlDWAdminPassword')]"
-            }
-			 
+          ]
         }
+      },
+      "plan": {
+        "name": "windows2016",
+        "publisher": "microsoft-ads",
+        "product": "windows-data-science-vm"
+      }
+    },
+    {
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "name": "[concat(variables('vmName'),'/', 'winExtension')]",
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "comments": "Script",
+        "tags": {
+            "displayName": "VM Extension"
+        },
+        "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+        ],
+        "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.4",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+                "fileUris": [
+                    "https://spektraazurelabs.blob.core.windows.net/aec/azureAdvancedAnalytics/sqlServerDataTools.ps1"
+                ]
+            },
+            "protectedSettings": {
+                "commandToExecute": "powershell -ExecutionPolicy Bypass -File azureAdvancedAnalytics/sqlServerDataTools.ps1 "
+            }
+        }
+    },
+    {
+      "name": "[variables('virtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-08-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "192.168.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "192.168.0.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('networkInterfaceName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2016-09-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]",
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name,'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressName')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2017-08-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "idleTimeoutInMinutes": 4,
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('networkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "Jupyter",
+            "properties": {
+              "priority": 1010,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "9999"
+            }
+          },
+          {
+            "name": "MSSQL",
+            "properties": {
+              "priority": 1020,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "1433"
+            }
+          },
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "priority": 1030,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.AnalysisServices/servers",
+      "sku": {
+        "name": "S0"
+      },
+      "name": "[variables('aSServerName')]",
+      "apiVersion": "2017-08-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "asAdministrators": {
+            "members": [
+                "[parameters('UPN')]"
+            ]
+        },
+        "managedMode": "1"
+      }
+    },
+    {
+      "apiVersion": "2014-04-01-preview",
+      "location": "[variables('location')]",
+      "name": "[variables('sqlDWServerName')]",
+      "type": "Microsoft.Sql/servers",
+      "properties": {
+        "administratorLogin": "[parameters('sqlDWDBAdminName')]",
+        "administratorLoginPassword": "[parameters('sqlDWAdminPassword')]",
+        "version": "[variables('version')]"
+      },
+      "resources": [
+        {
+          "name": "[variables('sqlDWDBName')]",
+          "apiVersion": "2014-04-01-preview",
+          "type": "databases",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', variables('sqlDWServerName'))]"
+          ],
+          "location": "[variables('location')]",
+          "properties": {
+            "edition": "DataWarehouse",
+            "collation": "[variables('collation')]",
+            "serviceLevelObjective": "[variables('serviceLevelObjective')]"
+          }
+        },
+        {
+          "apiVersion": "2014-04-01-preview",
+          "type": "firewallrules",
+          "location": "[variables('location')]",
+          "name": "AllowAllWindowsAzureIps",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', variables('sqlDWServerName'))]"
+          ],
+          "properties": {
+            "endIpAddress": "0.0.0.0",
+            "startIpAddress": "0.0.0.0"
+          }
+        }
+      ]
     }
+  ],
+  "outputs": {
+    "dsvmDNSName": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "dsvmUsername": {
+      "type": "string",
+      "value": "[parameters('vmAdminUsername')]"
+    },
+    "dsvmPassword": {
+      "type": "string",
+      "value": "[parameters('vmAdminPassword')]"
+    },
+    "sqlDWServerName": {
+      "value": "[concat(variables('sqlDWServerName'),'.database.windows.net')]",
+      "type": "string"
+    },
+    "sqlDWUsername": {
+      "type": "string",
+      "value": "[parameters('sqlDWDBAdminName')]"
+    },
+    "sqlDWPassword": {
+      "type": "string",
+      "value": "[parameters('sqlDWAdminPassword')]"
+    }
+
+  }
+}
