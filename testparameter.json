@@ -14,7 +14,7 @@
     "sqlDWAdminPassword": {
       "value": "demoPassword1!"
     },
-    "upn": {
+    "UPN": {
       "value": "GET-AZUSER-UPN"
     }
   }
