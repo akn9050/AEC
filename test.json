@@ -19,7 +19,10 @@
                 "metadata": {
                   "description": "SQL Datawarehouse Admin password. Ex: Testadmin@123"
                 }
-              }            
+              },
+              "UPN": {
+                "type": "string"
+            }           
         },
         "variables": {
             "sqlDWDBName": "sqlDwDb",
@@ -34,12 +37,11 @@
             "networkInterfaceName": "[concat(variables('vmName'), '-nic')]",
             "networkSecurityGroupName": "[concat(variables('vmName'), '-nsg')]",
             "publicIpAddressName": "[concat(variables('vmName'), '-PIP')]",
-	    "publicIpAddressDNSName": "[concat('dsvm', uniqueString(resourceGroup().id))]",
+	        "publicIpAddressDNSName": "[concat('dsvm', uniqueString(resourceGroup().id))]",
             "subnetName": "subnet1",
             "location": "[resourceGroup().location]",
             "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-            "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
-            "UPN" : "GET-AZUSER-UPN"
+            "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]"
         },
         "resources": [
             {
@@ -215,7 +217,7 @@
                 "properties": {
                     "asAdministrators": {
                         "members": [
-                            "[variables('UPN')]"
+                            "[parameters('UPN')]"
                         ]
                     },
                     "managedMode": "1"
