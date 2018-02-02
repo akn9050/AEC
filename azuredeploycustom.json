@@ -38,7 +38,8 @@
     "subnetName": "subnet1",
     "location": "[resourceGroup().location]",
     "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]"
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+    "customScriptName": "advanceAnalyticsServices.sh"
   },
   "resources": [
     {
@@ -104,8 +105,8 @@
             "typeHandlerVersion": "1.8",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "fileUris": "https://spektraazurelabs.blob.core.windows.net/aec/azureAdvancedAnalytics/sqlServerDataTools.ps1",
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'sqlServerDataTools.ps1')]"
+              "fileUris": "https://spektraazurelabs.blob.core.windows.net/aec/azureAdvancedAnalytics/advanceAnalyticsServices.sh",
+              "commandToExecute": "[concat('sh ', variables('customScriptName'))]"
             }
           }
         }
