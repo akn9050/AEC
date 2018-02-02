@@ -116,7 +116,7 @@
                 ]
             },
             "protectedSettings": {
-                "commandToExecute": "powershell -ExecutionPolicy Bypass -File azureAdvancedAnalytics/sqlServerDataTools.ps1 "
+                "commandToExecute": "powershell -ExecutionPolicy Bypass -File azureAdvancedAnalytics/sqlServerDataTools.ps1"
             }
         }
     },
