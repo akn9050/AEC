@@ -1,0 +1,38 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string"
+    }
+  },
+  "resources":[
+    {
+  "type": "Microsoft.Compute/virtualMachines/extensions",
+  "name": "[concat(parameters('vmName'),'/', 'winExtension')]",
+  "apiVersion": "2015-06-15",
+  "location": "[resourceGroup().location]",
+  "comments": "Script",
+  "tags": {
+    "displayName": "VM Extension"
+  },
+  "dependsOn": [
+    "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+  ],
+  "properties": {
+    "type": "CustomScriptExtension",
+    "publisher": "Microsoft.Compute",
+    "typeHandlerVersion": "1.8",
+    "autoUpgradeMinorVersion": true,
+    "settings": {
+      "fileUris": [
+        "https://spektraazurelabs.blob.core.windows.net/aec/devopsvsts/test.ps1"
+      ]
+    },
+    "protectedSettings": {
+      "commandToExecute": "powershell -ExecutionPolicy Bypass -File devopsvsts/test.ps1"
+    }
+  }
+}
+  ]
+}
