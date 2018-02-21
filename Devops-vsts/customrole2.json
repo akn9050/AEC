@@ -1,0 +1,13 @@
+{
+    "Name": "devops-vsts-custom-roleII",
+    "Id": "cadb9a5a-4e7a-49be-89db-05cadb546769",
+    "IsCustom": true,
+    "Description": "DevOps VSTS Hackfest Role",
+    "Actions": [
+      "Microsoft.Authorization/roleAssignments/write"
+    ],
+    "NotActions": [
+    ],
+    "AssignableScopes": [
+    ]
+  }

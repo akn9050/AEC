@@ -1,0 +1,19 @@
+{
+    "Name": "devops-vsts-custom-role",
+    "Id": "cadb9a5a-4e7a-49be-89db-05cad73b6769",
+    "IsCustom": true,
+    "Description": "DevOps VSTS Hackfest Role",
+    "Actions": [
+      "Microsoft.Authorization/*/read",
+      "Microsoft.Web/sites/*",
+      "Microsoft.Web/serverfarms/*",
+      "Microsoft.Resources/deployments/*",
+      "Microsoft.Sql/*",
+      "Microsoft.Resources/subscriptions/resourceGroups/read",
+      "microsoft.insights/*"
+    ],
+    "NotActions": [
+    ],
+    "AssignableScopes": [
+    ]
+  }

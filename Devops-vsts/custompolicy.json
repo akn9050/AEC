@@ -1,0 +1,93 @@
+{
+    "if": {
+      "anyOf": [
+        {
+          "allof": [
+            {
+              "field": "type",
+              "equals": "Microsoft.Web/serverfarms"
+            },
+            {
+              "not": {
+                "field": "Microsoft.Web/serverfarms/sku.name",
+                "equals": "S1"
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+                "field": "type",
+                "equals": "Microsoft.Sql/servers"
+            },
+            {
+                "not": {
+                  "anyOf": [
+                       {
+                        "field": "Microsoft.Sql/servers/version",
+                        "equals": "12.0"
+                         },
+                         {
+                       "source": "action",
+                       "equals": "Microsoft.sql/servers/write"
+                     }
+                     ]
+                   }
+            }
+        ]
+        },
+        {
+          "allof": [
+            {
+              "field": "type",
+              "equals": "Microsoft.sql/databases"
+            },
+            {
+              "source": "action",
+              "equals": "Microsoft.sql/databases/write"
+            },
+            {
+              "not":{
+                 "allof":[
+                {
+                  "field": "Microsoft.Sql/servers/databases/edition",
+                  "equals": "Basic"
+                },
+                {
+                  "field": "Microsoft.Sql/servers/databases/requestedServiceObjectiveName",
+                  "equals": "Basic"
+                }
+              ]
+            }
+          }
+        ]
+        },
+        {
+          "not": {
+            "anyOf": [
+              {
+                "field": "type",
+                "like": "Microsoft.Web/*"
+              },
+              {
+                "field": "type",
+                "like": "Microsoft.Sql/*"
+              },
+              {
+                "field": "type",
+                "like": "microsoft.insights/*"
+              },
+              {
+                "field": "type",
+                "like": "Microsoft.Resources/*"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "then": {
+      "effect": "deny"
+    }
+  }
